@@ -18,6 +18,7 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 	uid, err := auth.VerifyToken(token)
 
 	if err != nil {
+		log.Printf("[postLogs] token validation failed {token:\"%s\"}\n", token)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -27,6 +28,7 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 
 	// write error response if request is invalid
 	if err != nil {
+		log.Printf("[postLogs] invalid request {uid:%d, err:\"%s\"}\n", uid, err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("%s", err)))
 		return
@@ -36,6 +38,7 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 
 	// authorization failed
 	if !authorized {
+		log.Printf("[postLogs] authorization failed {uid:%d, owner:%d}\n", uid, reqParams.uid)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -47,6 +50,9 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 		log.Println(err) // likely an internal error
 		return
 	}
+
+	// TODO modify these log statements to use a common scheme
+	log.Printf("[postLogs] successful request {uid:%d, req:%v}\n", uid, reqParams)
 }
 
 type postDrinkLogsRequest struct {
