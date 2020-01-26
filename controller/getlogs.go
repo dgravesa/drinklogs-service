@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -18,6 +19,7 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 
 	// token authentication failed
 	if err != nil {
+		log.Printf("[getLogs] token validation failed {token:\"%s\"}\n", token)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -26,6 +28,7 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 
 	// write error response if request is invalid
 	if err != nil {
+		log.Printf("[getLogs] invalid request {uid:%d, err:\"%s\"}\n", uid, err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("%s", err)))
 		return
@@ -35,12 +38,16 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 
 	// authorization failed
 	if !authorized {
+		log.Printf("[getLogs] authorization failed {uid:%d, owner:%d}\n", uid, reqParams.uid)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	drinklogs := data.DrinkLogsInRange(reqParams.uid, reqParams.ti, reqParams.tf)
 
+	// TODO modify these log statements to use a common scheme
+	log.Printf("[getLogs] successful request {uid:%d, req:%v, reslen:%d}\n",
+		uid, reqParams, len(drinklogs))
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)
 	encoder.Encode(drinklogs)

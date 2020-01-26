@@ -1,7 +1,6 @@
 package data
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/dgravesa/drinklogs-service/model"
@@ -14,19 +13,18 @@ type InMemoryStore struct {
 
 // NewInMemoryStore returns a new in-memory drink log store.
 func NewInMemoryStore() *InMemoryStore {
-	return new(InMemoryStore)
+	var store InMemoryStore
+	store.drinklogs = make(map[uint64][]model.DrinkLog)
+	return &store
 }
 
 // Insert creates a new drink log for a user.
 func (s *InMemoryStore) Insert(uid uint64, log model.DrinkLog) error {
-	if userlogs, exists := s.drinklogs[uid]; exists {
-		userlogs = append(userlogs, log)
+	if _, exists := s.drinklogs[uid]; exists {
+		s.drinklogs[uid] = append(s.drinklogs[uid], log)
 	} else {
 		s.drinklogs[uid] = []model.DrinkLog{log}
 	}
-
-	// TODO remove
-	fmt.Printf("User %d inserted a new log. drinklogs[%d] = %v\n", uid, uid, s.drinklogs[uid])
 
 	return nil
 }

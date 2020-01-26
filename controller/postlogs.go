@@ -22,6 +22,7 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.ParseForm()
 	reqParams, err := newPostDrinkLogsRequest(uid, r.Form)
 
 	// write error response if request is invalid
@@ -58,17 +59,19 @@ func newPostDrinkLogsRequest(uid uint64, form url.Values) (postDrinkLogsRequest,
 
 	// set request uid to value in form if specified
 	if formUIDStr := form.Get("uid"); len(formUIDStr) > 0 {
-		if formUID, err := strconv.ParseUint(formUIDStr, 10, 64); err != nil {
+		if formUID, err := strconv.ParseUint(formUIDStr, 10, 64); err == nil {
 			request.uid = formUID
 		} else {
 			// return error if argument is not an unsigned integer
 			return postDrinkLogsRequest{}, fmt.Errorf("invalid uid argument: %s", formUIDStr)
 		}
+	} else {
+		request.uid = uid
 	}
 
 	// set amount from required value in form
 	if amountStr := form.Get("amt"); len(amountStr) > 0 {
-		if amount, err := strconv.ParseFloat(amountStr, 64); err != nil {
+		if amount, err := strconv.ParseFloat(amountStr, 64); err == nil {
 			request.drinklog.Amount = amount
 		} else {
 			return postDrinkLogsRequest{}, fmt.Errorf("invalid amount argument: %s", amountStr)
