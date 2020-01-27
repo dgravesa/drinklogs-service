@@ -11,14 +11,16 @@ import (
 	"github.com/dgravesa/drinklogs-service/data"
 )
 
-var dataBackendFlag = flag.String("data", "memory", "specify the data backend to use: [\"memory\"]")
+var dataBackendFlag = flag.String("data", "memory", "specify the data backend to use: [\"memory\", \"cassandra\"]")
 var authBackendFlag = flag.String("authentication", "test", "authentication service to use: [\"test\"]")
 var portFlag = flag.Uint("port", 33255, "port to listen on")
+var configNameFlag = flag.String("dbconfig", "", "config file to use when specifying a configurable data backend")
 
 func main() {
 	flag.Parse()
 	dataBackendType := *dataBackendFlag
 	authBackendType := *authBackendFlag
+	configName := *configNameFlag
 
 	var dataBackend data.DrinkLogStore
 	var authBackend auth.TokenVerifier
@@ -28,6 +30,8 @@ func main() {
 	switch dataBackendType {
 	case "memory":
 		dataBackend = data.NewInMemoryStore()
+	case "cassandra":
+		dataBackend = createCassandraClient(configName)
 	default:
 		log.Fatalf("unknown data backend type: '%s'\n", dataBackendType)
 	}
