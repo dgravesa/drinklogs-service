@@ -12,47 +12,60 @@ import (
 )
 
 var dataBackendFlag = flag.String("data", "memory", "specify the data backend to use: [\"memory\", \"cassandra\"]")
-var authBackendFlag = flag.String("authentication", "test", "authentication service to use: [\"test\"]")
+var authServiceFlag = flag.String("authentication", "test", "authentication service to use: [\"test\"]")
 var portFlag = flag.Uint("port", 33255, "port to listen on")
 var configNameFlag = flag.String("dbconfig", "", "config file to use when specifying a configurable data backend")
 
 func main() {
 	flag.Parse()
 	dataBackendType := *dataBackendFlag
-	authBackendType := *authBackendFlag
+	authServiceType := *authServiceFlag
 	configName := *configNameFlag
-
-	var dataBackend data.DrinkLogStore
-	var authBackend auth.TokenVerifier
 
 	// initialize the data backend
 	log.Printf("initializing data backend (%s)...", dataBackendType)
-	switch dataBackendType {
+	initializeDataBackend(dataBackendType, configName)
+	log.Printf("data backend initialized.\n")
+
+	// initialize the authentication service
+	log.Printf("creating authentication service (%s)...\n", authServiceType)
+	initializeAuthenticationService(authServiceType)
+	log.Printf("authentication service initialized.\n")
+
+	// initialize routes
+	controller.InitRoutes()
+	log.Println("initialized controller layer.")
+
+	// listen and serve
+	portNum := *portFlag
+	log.Printf("listening on port %d...", portNum)
+	http.ListenAndServe(fmt.Sprintf(":%d", portNum), nil)
+}
+
+func initializeDataBackend(backendType, configName string) {
+	var dataBackend data.DrinkLogStore
+
+	switch backendType {
 	case "memory":
 		dataBackend = data.NewInMemoryStore()
 	case "cassandra":
 		dataBackend = createCassandraClient(configName)
 	default:
-		log.Fatalf("unknown data backend type: '%s'\n", dataBackendType)
+		log.Fatalf("unknown data backend type: '%s'\n", backendType)
 	}
+
 	data.SetDrinkLogStore(dataBackend)
-	log.Printf("data backend initialized.\n")
+}
 
-	// initialize the authentication backend
-	log.Printf("creating authentication service (%s)...\n", authBackendType)
-	switch authBackendType {
+func initializeAuthenticationService(serviceType string) {
+	var authService auth.TokenVerifier
+
+	switch serviceType {
 	case "test":
-		authBackend = auth.NewTestTokenVerifier()
+		authService = auth.NewTestTokenVerifier()
 	default:
-		log.Fatalf("unknown authentication backend type: '%s'\n", authBackendType)
+		log.Fatalf("unknown authentication backend type: '%s'\n", serviceType)
 	}
-	auth.SetTokenVerifier(authBackend)
-	log.Printf("authentication service initialized.\n")
 
-	controller.InitRoutes()
-	log.Println("initialized controller layer.")
-
-	portNum := *portFlag
-	log.Printf("listening on port %d...", portNum)
-	http.ListenAndServe(fmt.Sprintf(":%d", portNum), nil)
+	auth.SetTokenVerifier(authService)
 }
