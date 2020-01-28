@@ -45,13 +45,20 @@ func main() {
 func initializeDataBackend(backendType, configName string) {
 	var dataBackend data.DrinkLogStore
 
+	failOnUnspecifiedConfig := func() {
+		if configName == "" {
+			log.Fatalln("init data backend: No dbconfig file specified")
+		}
+	}
+
 	switch backendType {
 	case "memory":
 		dataBackend = data.NewInMemoryStore()
 	case "cassandra":
+		failOnUnspecifiedConfig()
 		dataBackend = createCassandraClient(configName)
 	default:
-		log.Fatalf("unknown data backend type: '%s'\n", backendType)
+		log.Fatalf("init data backend: Unknown data backend type \"%s\"\n", backendType)
 	}
 
 	data.SetDrinkLogStore(dataBackend)
@@ -64,7 +71,7 @@ func initializeAuthenticationService(serviceType string) {
 	case "test":
 		authService = auth.NewTestTokenVerifier()
 	default:
-		log.Fatalf("unknown authentication backend type: '%s'\n", serviceType)
+		log.Fatalf("init auth service: Unknown authentication backend type \"%s\"\n", serviceType)
 	}
 
 	auth.SetTokenVerifier(authService)
