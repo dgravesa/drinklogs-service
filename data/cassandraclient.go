@@ -42,8 +42,7 @@ func (c *CassandraClient) InRange(uid uint64, ti, tf time.Time) ([]model.DrinkLo
 	iter := c.session.Query(
 		`SELECT toTimestamp(time), amount FROM drinklogs
 		WHERE uid = ? AND time >= ? AND time <= ?`,
-		uid, gocql.MinTimeUUID(ti), gocql.MaxTimeUUID(tf),
-	).Consistency(gocql.One).Iter()
+		uid, gocql.MinTimeUUID(ti), gocql.MaxTimeUUID(tf)).Consistency(gocql.One).Iter()
 
 	// get logs from query result
 	var log model.DrinkLog
