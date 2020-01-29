@@ -43,7 +43,13 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	drinklogs := data.DrinkLogsInRange(reqParams.uid, reqParams.ti, reqParams.tf)
+	drinklogs, err := data.DrinkLogsInRange(reqParams.uid, reqParams.ti, reqParams.tf)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err) // likely an internal error
+		return
+	}
 
 	// TODO modify these log statements to use a common scheme
 	log.Printf("[getLogs] successful request {uid:%d, req:%v, reslen:%d}\n",

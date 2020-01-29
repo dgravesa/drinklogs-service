@@ -30,7 +30,7 @@ func (s *InMemoryStore) Insert(uid uint64, log model.DrinkLog) error {
 }
 
 // InRange returns drink logs within a specified time range for a user.
-func (s *InMemoryStore) InRange(uid uint64, ti, tf time.Time) []model.DrinkLog {
+func (s *InMemoryStore) InRange(uid uint64, ti, tf time.Time) ([]model.DrinkLog, error) {
 	result := []model.DrinkLog{}
 
 	if userlogs, exists := s.drinklogs[uid]; exists {
@@ -42,5 +42,5 @@ func (s *InMemoryStore) InRange(uid uint64, ti, tf time.Time) []model.DrinkLog {
 		}
 	}
 
-	return result
+	return result, nil
 }

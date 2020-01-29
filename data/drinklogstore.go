@@ -10,7 +10,7 @@ type DrinkLogStore interface {
 	Insert(uid uint64, log model.DrinkLog) error
 
 	// InRange returns drink logs within a specified time range for a user.
-	InRange(uid uint64, ti, tf time.Time) []model.DrinkLog
+	InRange(uid uint64, ti, tf time.Time) ([]model.DrinkLog, error)
 }
 
 var drinkLogStore DrinkLogStore
@@ -21,7 +21,7 @@ func SetDrinkLogStore(store DrinkLogStore) {
 }
 
 // DrinkLogsInRange returns all drink logs in a time range for a user.
-func DrinkLogsInRange(uid uint64, ti, tf time.Time) []model.DrinkLog {
+func DrinkLogsInRange(uid uint64, ti, tf time.Time) ([]model.DrinkLog, error) {
 	return drinkLogStore.InRange(uid, ti, tf)
 }
 
