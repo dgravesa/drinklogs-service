@@ -12,24 +12,26 @@ import (
 )
 
 var dataBackendFlag = flag.String("data", "memory", "specify the data backend to use: [\"memory\", \"cassandra\"]")
-var authServiceFlag = flag.String("authentication", "test", "authentication service to use: [\"test\"]")
+var authServiceFlag = flag.String("authentication", "test", "authentication service to use: [\"test\", \"firebase\"]")
 var portFlag = flag.Uint("port", 33255, "port to listen on")
-var configNameFlag = flag.String("dbconfig", "", "config file to use when specifying a configurable data backend")
+var dataConfigNameFlag = flag.String("dbconfig", "", "config file to use when specifying a configurable data backend")
+var authConfigNameFlag = flag.String("authconfig", "", "config file to use when specifying a configurable authentication backend")
 
 func main() {
 	flag.Parse()
 	dataBackendType := *dataBackendFlag
 	authServiceType := *authServiceFlag
-	configName := *configNameFlag
+	dataConfigName := *dataConfigNameFlag
+	authConfigName := *authConfigNameFlag
 
 	// initialize the data backend
 	log.Printf("initializing data backend (%s)...", dataBackendType)
-	initializeDataBackend(dataBackendType, configName)
+	initializeDataBackend(dataBackendType, dataConfigName)
 	log.Printf("data backend initialized.\n")
 
 	// initialize the authentication service
 	log.Printf("creating authentication service (%s)...\n", authServiceType)
-	initializeAuthenticationService(authServiceType)
+	initializeAuthenticationService(authServiceType, authConfigName)
 	log.Printf("authentication service initialized.\n")
 
 	// initialize routes
@@ -64,12 +66,14 @@ func initializeDataBackend(backendType, configName string) {
 	data.SetDrinkLogStore(dataBackend)
 }
 
-func initializeAuthenticationService(serviceType string) {
+func initializeAuthenticationService(serviceType, configName string) {
 	var authService auth.TokenVerifier
 
 	switch serviceType {
 	case "test":
 		authService = auth.NewTestTokenVerifier()
+	case "firebase":
+		authService = createFirebaseTokenVerifier(configName)
 	default:
 		log.Fatalf("init auth service: Unknown authentication backend type \"%s\"\n", serviceType)
 	}
