@@ -2,7 +2,14 @@ package main
 
 import "github.com/dgravesa/drinklogs-service/auth"
 
-func createFirebaseTokenVerifier(configName string) *auth.FirebaseTokenVerifier {
-	// TODO implement
-	return nil
+import "log"
+
+func createFirebaseTokenVerifier(keyname string) *auth.FirebaseTokenVerifier {
+	tv, err := auth.NewFirebaseTokenVerifier(keyname)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return tv
 }

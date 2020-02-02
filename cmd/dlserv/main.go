@@ -47,17 +47,10 @@ func main() {
 func initializeDataBackend(backendType, configName string) {
 	var dataBackend data.DrinkLogStore
 
-	failOnUnspecifiedConfig := func() {
-		if configName == "" {
-			log.Fatalln("init data backend: No dbconfig file specified")
-		}
-	}
-
 	switch backendType {
 	case "memory":
 		dataBackend = data.NewInMemoryStore()
 	case "cassandra":
-		failOnUnspecifiedConfig()
 		dataBackend = createCassandraClient(configName)
 	default:
 		log.Fatalf("init data backend: Unknown data backend type \"%s\"\n", backendType)

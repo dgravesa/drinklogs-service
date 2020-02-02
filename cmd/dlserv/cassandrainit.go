@@ -10,6 +10,10 @@ import (
 func createCassandraClient(configName string) *data.CassandraClient {
 	var client *data.CassandraClient
 
+	if configName == "" {
+		log.Fatalln("cassandra init: no dbconfig file specified")
+	}
+
 	// load configuration from file
 	config, err := data.ReadCassandraClientConfig(configName)
 	if err != nil {
