@@ -15,7 +15,7 @@ import (
 
 func postLogs(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
-	uid, err := auth.VerifyToken(token)
+	uid, err := auth.VerifyToken(r.Context(), token)
 
 	if err != nil {
 		log.Printf("[postLogs] token validation failed {token:\"%s\"}\n", token)
@@ -56,21 +56,16 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 type postDrinkLogsRequest struct {
-	uid      uint64
+	uid      string
 	drinklog model.DrinkLog
 }
 
-func newPostDrinkLogsRequest(uid uint64, form url.Values) (postDrinkLogsRequest, error) {
+func newPostDrinkLogsRequest(uid string, form url.Values) (postDrinkLogsRequest, error) {
 	var request postDrinkLogsRequest
 
 	// set request uid to value in form if specified
-	if formUIDStr := form.Get("uid"); len(formUIDStr) > 0 {
-		if formUID, err := strconv.ParseUint(formUIDStr, 10, 64); err == nil {
-			request.uid = formUID
-		} else {
-			// return error if argument is not an unsigned integer
-			return postDrinkLogsRequest{}, fmt.Errorf("invalid uid argument: %s", formUIDStr)
-		}
+	if formUID := form.Get("uid"); len(formUID) > 0 {
+		request.uid = formUID
 	} else {
 		request.uid = uid
 	}

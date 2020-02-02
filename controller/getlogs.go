@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/dgravesa/drinklogs-service/auth"
@@ -15,7 +14,7 @@ import (
 
 func getLogs(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
-	uid, err := auth.VerifyToken(token)
+	uid, err := auth.VerifyToken(r.Context(), token)
 
 	// token authentication failed
 	if err != nil {
@@ -60,12 +59,12 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 type getDrinkLogsRequestParams struct {
-	uid uint64
+	uid string
 	ti  time.Time
 	tf  time.Time
 }
 
-func newGetDrinkLogsRequest(requesterID uint64, query url.Values) (getDrinkLogsRequestParams, error) {
+func newGetDrinkLogsRequest(requesterID string, query url.Values) (getDrinkLogsRequestParams, error) {
 	// initialize to defaults
 	currentTime := time.Now()
 	drinkLogsReqParams := getDrinkLogsRequestParams{
@@ -75,12 +74,8 @@ func newGetDrinkLogsRequest(requesterID uint64, query url.Values) (getDrinkLogsR
 	}
 
 	// get uid from query if specified
-	if queryUIDStr := query.Get("uid"); len(queryUIDStr) > 0 {
-		if queryUID, err := strconv.ParseUint(queryUIDStr, 10, 64); err == nil {
-			drinkLogsReqParams.uid = queryUID
-		} else {
-			return getDrinkLogsRequestParams{}, fmt.Errorf("invalid uid argument: %s", queryUIDStr)
-		}
+	if queryUID := query.Get("uid"); len(queryUID) > 0 {
+		drinkLogsReqParams.uid = queryUID
 	}
 
 	// get begin time from query if specified

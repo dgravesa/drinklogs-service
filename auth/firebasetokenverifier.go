@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
@@ -33,7 +32,9 @@ func NewFirebaseTokenVerifier(keyname string) (*FirebaseTokenVerifier, error) {
 }
 
 // Verify converts the token to a UID, or returns error if token is not a valid UID.
-func (v *FirebaseTokenVerifier) Verify(token string) (uint64, error) {
-	// TODO implement
-	return 0, fmt.Errorf("not yet implemented")
+// TODO: may want to return user permissions on token verification.
+func (tv *FirebaseTokenVerifier) Verify(ctx context.Context, token string) (string, error) {
+	verified, err := tv.client.VerifyIDToken(ctx, token)
+
+	return verified.UID, err
 }

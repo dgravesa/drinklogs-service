@@ -28,14 +28,14 @@ func NewCassandraClient(config CassandraClientConfig) (*CassandraClient, error) 
 }
 
 // Insert creates a new drink log for a user.
-func (c *CassandraClient) Insert(uid uint64, log model.DrinkLog) error {
+func (c *CassandraClient) Insert(uid string, log model.DrinkLog) error {
 	return c.session.Query(
 		`INSERT INTO drinklogs (uid, time, amount) VALUES (?, ?, ?)`,
 		uid, gocql.UUIDFromTime(log.Time), log.Amount).Exec()
 }
 
 // InRange returns drink logs within a specified time range for a user.
-func (c *CassandraClient) InRange(uid uint64, ti, tf time.Time) ([]model.DrinkLog, error) {
+func (c *CassandraClient) InRange(uid string, ti, tf time.Time) ([]model.DrinkLog, error) {
 	var reslogs []model.DrinkLog
 
 	// execute query
