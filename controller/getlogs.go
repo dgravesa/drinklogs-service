@@ -53,6 +53,8 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 	// TODO modify these log statements to use a common scheme
 	log.Printf("[getLogs] successful request {uid:%s, req:%v, reslen:%d}\n",
 		uid, reqParams, len(drinklogs))
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)
 	encoder.Encode(drinklogs)
