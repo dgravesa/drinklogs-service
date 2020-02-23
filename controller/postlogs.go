@@ -18,7 +18,7 @@ func postLogs(w http.ResponseWriter, r *http.Request) {
 	uid, err := auth.VerifyToken(r.Context(), token)
 
 	if err != nil {
-		log.Printf("[postLogs] token validation failed {token:\"%s\"}\n", token)
+		log.Printf("[postLogs] token validation failed: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

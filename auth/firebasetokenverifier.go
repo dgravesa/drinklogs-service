@@ -34,7 +34,14 @@ func NewFirebaseTokenVerifier(keyname string) (*FirebaseTokenVerifier, error) {
 // Verify converts the token to a UID, or returns error if token is not a valid UID.
 // TODO: may want to return user permissions on token verification.
 func (tv *FirebaseTokenVerifier) Verify(ctx context.Context, token string) (string, error) {
+	var uid string
+
+	// get verified token content
 	verified, err := tv.client.VerifyIDToken(ctx, token)
 
-	return verified.UID, err
+	if verified != nil {
+		uid = verified.UID
+	}
+
+	return uid, err
 }

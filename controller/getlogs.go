@@ -18,7 +18,7 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 
 	// token authentication failed
 	if err != nil {
-		log.Printf("[getLogs] token validation failed: %s {token:\"%s\"}\n", err, token)
+		log.Printf("[getLogs] token validation failed: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
